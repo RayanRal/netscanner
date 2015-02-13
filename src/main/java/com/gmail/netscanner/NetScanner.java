@@ -13,7 +13,7 @@ public class NetScanner {
 		InetAddress localhost = InetAddress.getLocalHost();
 		// this code assumes IPv4 is used
 		byte[] ip = localhost.getAddress();
-		for (int i = 1; i <= 254; i++)
+		for (int i = 1; i <= 254; i++)//checkingCommits‘
 		{
 			ip[3] = (byte)i;
 			InetAddress address = InetAddress.getByAddress(ip);
