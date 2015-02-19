@@ -24,8 +24,7 @@ public class NetScanner {
 		 **************************************************************************/
 		int r = Pcap.findAllDevs(alldevs, errbuf);
 		if (r == Pcap.NOT_OK || alldevs.isEmpty()) {
-			System.err.printf("Can't read list of devices, error is %s", errbuf
-					.toString());
+			System.err.printf("Can't read list of devices, error is %s", errbuf.toString());
 			return;
 		}
 
@@ -33,17 +32,12 @@ public class NetScanner {
 
 		int i = 0;
 		for (PcapIf device : alldevs) {
-			String description =
-					(device.getDescription() != null) ? device.getDescription()
-							: "No description available";
+			String description = (device.getDescription() != null) ? device.getDescription() : "No description available";
 			System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
 		}
 
-		PcapIf device = alldevs.get(0); // We know we have atleast 1 device
-		System.out
-				.printf("\nChoosing '%s' on your behalf:\n",
-						(device.getDescription() != null) ? device.getDescription()
-								: device.getName());
+		PcapIf device = alldevs.get(0); // We know we have at least 1 device
+		System.out.printf("\nChoosing '%s' on your behalf:\n", (device.getDescription() != null) ? device.getDescription() : device.getName());
 
 		/***************************************************************************
 		 * Second we open up the selected device
@@ -51,12 +45,10 @@ public class NetScanner {
 		int snaplen = 64 * 1024;           // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 10 * 1000;           // 10 seconds in millis
-		Pcap pcap =
-				Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);
+		Pcap pcap = Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);
 
 		if (pcap == null) {
-			System.err.printf("Error while opening device for capture: "
-					+ errbuf.toString());
+			System.err.printf("Error while opening device for capture: " + errbuf.toString());
 			return;
 		}
 
@@ -65,9 +57,7 @@ public class NetScanner {
 		 * libpcap loop.
 		 **************************************************************************/
 		PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
-
 			public void nextPacket(PcapPacket packet, String user) {
-
 				System.out.printf("Received packet at %s caplen=%-4d len=%-4d %s\n",
 						new Date(packet.getCaptureHeader().timestampInMillis()),
 						packet.getCaptureHeader().caplen(),  // Length actually captured
