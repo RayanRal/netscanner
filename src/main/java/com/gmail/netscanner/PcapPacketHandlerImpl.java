@@ -58,6 +58,7 @@ public class PcapPacketHandlerImpl<T> implements PcapPacketHandler<T> {
                  * doesn't exist and no peering was performed.
                  */
         if (packet.hasHeader(tcp)) {
+            //todo can get a lot of info from header
             System.out.printf("tcp header::%s%n", tcp.toString());
         }
 

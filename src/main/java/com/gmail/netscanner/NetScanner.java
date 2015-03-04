@@ -31,11 +31,11 @@ public class NetScanner {
          * Third we create a packet handler which will receive packets from the
          * libpcap loop.
          **************************************************************************/
-        PcapPacketHandler<StringBuffer> jpacketHandler = new PcapPacketHandlerImpl<StringBuffer>();
+        PcapPacketHandler<StringBuffer> jpacketHandler = new PcapPacketHandlerImpl<>();
 
         JScanner.getThreadLocal().setFrameNumber(0);
 
-        final PcapPacket packet = new PcapPacket(JMemory.POINTER);
+//        final PcapPacket packet = new PcapPacket(JMemory.POINTER);
 //        final Tcp tcp = new Tcp();
 
         /*for (int i = 0; i < 5; i++) {
@@ -46,7 +46,7 @@ public class NetScanner {
             }
         }*/
 
-        final Map<JFlowKey, JFlow> flows = getFlowsMap(pcap, packet);
+//        final Map<JFlowKey, JFlow> flows = getFlowsMap(pcap, packet);
 
 
         /*
@@ -54,9 +54,9 @@ public class NetScanner {
          * Map, we can now access those flows and the packet within it. The packets
          * are now grouped into flows.
          */
-        for (JFlow flow : flows.values()) {
-            processFlow(flow);
-        }
+//        for (JFlow flow : flows.values()) {
+//            processFlow(flow);
+//        }
 
         /*
          * We still haven't read all the packets from our offline file. Here is an
@@ -110,7 +110,7 @@ public class NetScanner {
         return pcap;
     }
 
-    private static PcapIf getDeviceInterface() {
+    private static PcapIf getDeviceInterface() throws IOException {
         List<PcapIf> alldevs = new ArrayList<>(); // Will be filled with NICs
         StringBuilder errbuf = new StringBuilder(); // For any error msgs
 
@@ -129,6 +129,13 @@ public class NetScanner {
         for (PcapIf device : alldevs) {
             String description = (device.getDescription() != null) ? device.getDescription() : "No description available";
             System.out.printf("#%d: %s [%s]\n", deviceNumber++, device.getName(), description);
+
+            //get the mac of device
+            final byte[] mac = device.getHardwareAddress();
+            if (mac == null) {
+                continue; // Interface doesn't have a hardware address
+            }
+            System.out.printf("%s = %s\n", device.getDescription(), Utils.asString(mac));
         }
 
         return alldevs.get(0);        // We know we have at least 1 device
@@ -142,7 +149,7 @@ public class NetScanner {
          * of various flows with packets in it.
          */
     private static Map<JFlowKey, JFlow> getFlowsMap(Pcap pcap, PcapPacket packet) {
-        final Map<JFlowKey, JFlow> flows = new HashMap<JFlowKey, JFlow>();
+        final Map<JFlowKey, JFlow> flows = new HashMap<>();
 
         for (int i = 0; i < 50; i++) {
             pcap.nextEx(packet);
