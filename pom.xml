@@ -55,7 +55,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.gmail.netscanner.NetScanner</mainClass>
+                            <mainClass>com.gmail.netscanner.scanner.NetScanner</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -88,7 +88,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.gmail.netscanner.NetScanner</mainClass>
+                            <mainClass>com.gmail.netscanner.scanner.NetScanner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

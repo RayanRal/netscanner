@@ -1,4 +1,4 @@
-package com.gmail.netscanner;
+package com.gmail.netscanner.scanner;
 
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
