@@ -2,6 +2,7 @@ package com.gmail.netscanner.scanner;
 
 import com.gmail.netscanner.exceptions.AccessDeviceException;
 import com.gmail.netscanner.scanner.PcapPacketHandlerImpl;
+import javafx.event.EventTarget;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.JFlowMap;
@@ -16,13 +17,19 @@ public class StartButtonAction implements Runnable {
 	private static int snaplen = 64 * 1024;           // Capture all packets, no trucation
 	private static int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 	private static int timeout = 10 * 1000;           // 10 seconds in millis
+	private EventTarget target;
 
-	public StartButtonAction(PcapIf device) {
+	public StartButtonAction(PcapIf device, EventTarget target) {
 		this.device = device;
+		this.target = target;
 	}
 
 	public void setDevice(PcapIf device) {
 		this.device = device;
+	}
+
+	public void setTarget(EventTarget target) {
+		this.target = target;
 	}
 
 	@Override
@@ -70,7 +77,18 @@ public class StartButtonAction implements Runnable {
 		 * the loop method exists that allows the programmer to sepecify exactly
 		 * which protocol ID to use as the data link type for this pcap interface.
 		 **************************************************************************/
-		pcap.loop(Pcap.LOOP_INFINITE, new PcapPacketHandlerImpl<>(), new StringBuffer("jNetPcap rocks!"));
+		int x = 0;
+		while(x < 1000) {
+//			pcap.loop(Pcap.LOOP_INFINITE, new PcapPacketHandlerImpl<>(target), new StringBuffer("jNetPcap rocks!"));
+			pcap.loop(1, new PcapPacketHandlerImpl<>(target), new StringBuffer("jNetPcap rocks!"));
+			x++;
+			System.out.println("x " + x);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
 		/***************************************************************************
 		 * Last thing to do is close the pcap handle

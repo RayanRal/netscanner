@@ -2,59 +2,39 @@ package com.gmail.netscanner.scanner;
 
 import javafx.event.Event;
 import javafx.event.EventType;
+import org.jnetpcap.protocol.tcpip.Tcp;
 
 /**
  * Created by le012ch on 2015-03-17.
  */
 public class NextPacketEvent extends Event {
 
-	private String checksum;
-	private boolean isChecksumCorrect;
-	private String destinationPort;
-	private String sourcePort;
-	private String acknowledgement;
+	private Tcp tcp;
+	private long frameNumber;
 
-	public NextPacketEvent() {
+	public NextPacketEvent(long frameNumber, Tcp tcp) {
 		super(EventType.ROOT);
+		this.frameNumber = frameNumber;
+		this.tcp = tcp;
 	}
 
-	public void setChecksum(String checksum) {
-		this.checksum = checksum;
-	}
-
-	public void setChecksumCorrect(boolean isChecksumCorrect) {
-		this.isChecksumCorrect = isChecksumCorrect;
-	}
-
-	public void setDestinationPort(String destinationPort) {
-		this.destinationPort = destinationPort;
-	}
-
-	public void setSourcePort(String sourcePort) {
-		this.sourcePort = sourcePort;
-	}
-
-	public void setAcknowledgement(String acknowledgement) {
-		this.acknowledgement = acknowledgement;
-	}
-
-	public String getChecksum() {
-		return checksum;
+	public long getFrameNumber() {
+		return frameNumber;
 	}
 
 	public boolean isChecksumCorrect() {
-		return isChecksumCorrect;
+		return tcp.isChecksumValid();
 	}
 
 	public String getDestinationPort() {
-		return destinationPort;
+		return String.valueOf(tcp.destination());
 	}
 
 	public String getSourcePort() {
-		return sourcePort;
+		return String.valueOf(tcp.source());
 	}
 
 	public String getAcknowledgement() {
-		return acknowledgement;
+		return String.valueOf(tcp.ack());
 	}
 }

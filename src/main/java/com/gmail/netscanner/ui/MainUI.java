@@ -1,10 +1,12 @@
 package com.gmail.netscanner.ui;
 
 import com.gmail.netscanner.scanner.NetScanner;
+import com.gmail.netscanner.scanner.NextPacketEvent;
 import com.gmail.netscanner.scanner.StartButtonAction;
-import com.gmail.netscanner.Utils;
+import com.gmail.netscanner.utils.Utils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventType;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -35,13 +37,15 @@ public class MainUI extends Application {
 
 	NetScanner scanner = new NetScanner();
 	PcapIf selectedDevice = scanner.findAllDevs().get(0);
+	Group root = new Group();
+	Scene scene = new Scene(root, 500, 300);
+	Button startButton = createStartButton();
+	Text text = getInfoText();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Group root = new Group();
 		TabPane tabPane = new TabPane();
 		BorderPane borderPane = new BorderPane();
-		Scene scene = new Scene(root, 500, 300);
 		borderPane.setCenter(tabPane);
 		borderPane.prefHeightProperty().bind(scene.heightProperty());
 		borderPane.prefWidthProperty().bind(scene.widthProperty());
@@ -118,12 +122,44 @@ public class MainUI extends Application {
 		Tab mainTab = new Tab(MAIN_TAB_NAME);
 
 		HBox mainHorizontalBox = new HBox(30);
-		Button startButton = new Button("Start catching packets");
-		startButton.setOnAction(event -> Platform.runLater(new StartButtonAction(selectedDevice)));
-		mainHorizontalBox.getChildren().add(startButton);
+
+		VBox packageInfoBox = getPackageInfoBox();
+		mainHorizontalBox.getChildren().addAll(startButton, packageInfoBox);
 
 		mainTab.setContent(mainHorizontalBox);
 		return mainTab;
+	}
+
+	private VBox getPackageInfoBox() {
+		VBox box = new VBox(5);
+		box.getChildren().add(text);
+		return box;
+	}
+
+	private Text getInfoText() {
+		Text text = new Text("Here will be text!");
+		text.addEventHandler(EventType.ROOT, event ->	Platform.runLater(
+						() -> {
+							if (event instanceof NextPacketEvent) {
+								NextPacketEvent packetEvent = (NextPacketEvent) event;
+								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
+										"Checksum: " + packetEvent.isChecksumCorrect() + "\n" +
+										"Source: " + packetEvent.getSourcePort() + "\n" +
+										"Destination: " + packetEvent.getDestinationPort());
+							}
+							event.consume();
+						})
+		);
+		return text;
+	}
+
+	private Button createStartButton() {
+		Button startButton = new Button("Start catching packets");
+		startButton.setOnAction(event -> {
+			startButton.setVisible(false);
+			Platform.runLater(new StartButtonAction(selectedDevice, text));
+		});
+		return startButton;
 	}
 
 	public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.gmail.netscanner;
+package com.gmail.netscanner.utils;
 
 import com.gmail.netscanner.scanner.NextPacketEvent;
 

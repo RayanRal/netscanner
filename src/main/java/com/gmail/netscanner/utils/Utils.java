@@ -1,4 +1,4 @@
-package com.gmail.netscanner;
+package com.gmail.netscanner.utils;
 
 public class Utils {
 
