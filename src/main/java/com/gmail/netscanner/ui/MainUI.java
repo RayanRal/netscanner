@@ -157,8 +157,6 @@ public class MainUI extends Application {
 	private Button createStartButton() {
 		Button startButton = new Button("Start catching packets");
 		startButton.setOnAction(event -> {
-
-
 			Platform.runLater(new StartButtonAction(selectedDevice, text));
 			startButton.setVisible(false);
 		});
