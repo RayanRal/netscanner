@@ -3,10 +3,10 @@ package com.gmail.netscanner.exceptions;
 /**
  * Created by le012ch on 2015-03-17.
  */
-public class AccessDeviceException extends RuntimeException {
+public class DeviceAccessException extends RuntimeException {
 
 
-	public AccessDeviceException(String message) {
+	public DeviceAccessException(String message) {
 		super(message);
 	}
 

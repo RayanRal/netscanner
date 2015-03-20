@@ -1,33 +1,17 @@
 package com.gmail.netscanner.scanner;
 
-import com.gmail.netscanner.exceptions.AccessDeviceException;
 import com.gmail.netscanner.exceptions.GetDeviceException;
-import com.gmail.netscanner.scanner.PcapPacketHandlerImpl;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.*;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
  * Created by le012ch on 2015-02-13.
  */
-public class NetScanner {
-
-	public List<PcapIf> findAllDevs() {
-		StringBuilder errbuf = new StringBuilder(); // For any error msgs
-
-		List<PcapIf> alldevs = new ArrayList<>();
-		int r = Pcap.findAllDevs(alldevs, errbuf);
-
-		if (r != Pcap.OK || alldevs.isEmpty()) {
-			System.err.printf("Can't read list of devices, error is %s", errbuf.toString());
-			throw new GetDeviceException(errbuf.toString());
-		}
-
-		return alldevs;
-	}
+@Deprecated
+public class NetScannerOld {
 
 	/*
 		 * Each packet scanned, also has a flow key associated with it. The flow key

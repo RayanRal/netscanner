@@ -1,8 +1,7 @@
 package com.gmail.netscanner.ui;
 
-import com.gmail.netscanner.scanner.NetScanner;
+import com.gmail.netscanner.scanner.Scanner;
 import com.gmail.netscanner.scanner.NextPacketEvent;
-import com.gmail.netscanner.scanner.StartButtonAction;
 import com.gmail.netscanner.utils.Utils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -35,10 +34,7 @@ public class MainUI extends Application {
 	public static final String APP_NAME = "Net Scanner";
 	public static final String MAIN_TAB_NAME = "Main";
 
-	NetScanner scanner = new NetScanner();
-	PcapIf selectedDevice = scanner.findAllDevs().get(0);
-	Group root = new Group();
-	Scene scene = new Scene(root, 500, 300);
+	PcapIf selectedDevice = Scanner.findAllDevs().get(0);
 	Button startButton = createStartButton();
 	Text text = getInfoText();
 
@@ -47,6 +43,8 @@ public class MainUI extends Application {
 		TabPane tabPane = new TabPane();
 		BorderPane borderPane = new BorderPane();
 		borderPane.setCenter(tabPane);
+		Group root = new Group();
+		Scene scene = new Scene(root, 500, 300);
 		borderPane.prefHeightProperty().bind(scene.heightProperty());
 		borderPane.prefWidthProperty().bind(scene.widthProperty());
 
@@ -84,29 +82,29 @@ public class MainUI extends Application {
 	private List<HBox> getDevicesList() throws IOException {
 		List<HBox> devicesUiInfo = new ArrayList<>();
 
-		List<PcapIf> devices = scanner.findAllDevs();
-
 		int deviceNumber = 1;
 		final ToggleGroup group = new ToggleGroup();
+
+		List<PcapIf> devices = Scanner.findAllDevs();
 		for (PcapIf device : devices) {
-			HBox deviceUiInfo = new HBox(10);
-
-			deviceUiInfo.getChildren().add(createRadioButton(deviceNumber, group, device));
-			deviceUiInfo.getChildren().add(new Text(device.getName()));
-
-//			String description = (device.getDescription() != null) ? device.getDescription() : "No description available";
-//			deviceUiInfo.getChildren().add(new Text(description));
-
-			//get the mac of device
-			final byte[] mac = device.getHardwareAddress();
-			deviceUiInfo.getChildren().add(new Text(mac != null ? Utils.asString(mac) : "No MAC available"));
-
-			devicesUiInfo.add(deviceUiInfo);
-
+			devicesUiInfo.add(getDeviceUiInfo(deviceNumber, group, device));
 			deviceNumber++;
 		}
 
 		return devicesUiInfo;
+	}
+
+	private HBox getDeviceUiInfo(int deviceNumber, ToggleGroup group, PcapIf device) throws IOException {
+		HBox deviceUiInfo = new HBox(10);
+
+		deviceUiInfo.getChildren().add(createRadioButton(deviceNumber, group, device));
+		deviceUiInfo.getChildren().add(new Text(device.getName()));
+
+		//get the mac of device
+		final byte[] mac = device.getHardwareAddress();
+		deviceUiInfo.getChildren().add(new Text(mac != null ? Utils.asString(mac) : "No MAC available"));
+
+		return deviceUiInfo;
 	}
 
 	private RadioButton createRadioButton(int deviceNumber, ToggleGroup group, PcapIf device) {
@@ -143,9 +141,12 @@ public class MainUI extends Application {
 							if (event instanceof NextPacketEvent) {
 								NextPacketEvent packetEvent = (NextPacketEvent) event;
 								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
-										"Checksum: " + packetEvent.isChecksumCorrect() + "\n" +
+										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
+										"Checksum: " + packetEvent.getChecksum() + " (" + packetEvent.isChecksumCorrect() + ")\n" +
 										"Source: " + packetEvent.getSourcePort() + "\n" +
-										"Destination: " + packetEvent.getDestinationPort());
+										"Destination: " + packetEvent.getDestinationPort() + "\n" +
+										"\nHexDump: \n" + packetEvent.getHexDump() + "\n" +
+										"");
 							}
 							event.consume();
 						})
@@ -156,8 +157,8 @@ public class MainUI extends Application {
 	private Button createStartButton() {
 		Button startButton = new Button("Start catching packets");
 		startButton.setOnAction(event -> {
-			startButton.setVisible(false);
 			Platform.runLater(new StartButtonAction(selectedDevice, text));
+			startButton.setVisible(false);
 		});
 		return startButton;
 	}
