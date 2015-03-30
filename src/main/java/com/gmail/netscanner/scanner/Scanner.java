@@ -8,8 +8,11 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by le012ch on 2015-03-20.
@@ -19,16 +22,18 @@ public class Scanner {
 	private static int snaplen = 64 * 1024;           // Capture all packets, no trucation
 	private static int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 	private static int timeout = 10 * 1000;           // 10 seconds in millis
+
 	private static volatile Pcap pcap;
 	private static StringBuilder errorBuffer = new StringBuilder();
 
 	//to diversify incoming and outgoing messages
 	private static String ipv4Address;
 
-	private static final List<String> outgoingHosts = new ArrayList<>();
-	private static final List<String> incomingHosts = new ArrayList<>();
+	private static final Map<String, Integer> outgoingHosts = new HashMap<>();
+	private static final Map<String, Integer> incomingHosts = new HashMap<>();
 
-	private Scanner() {}
+	private Scanner() {
+	}
 
 	//util method for finding devices
 	public static List<PcapIf> findAllDevs() {
@@ -49,7 +54,7 @@ public class Scanner {
 		Pcap localPcap = pcap;
 		if (localPcap == null) {
 			synchronized (Scanner.class) {
-				if(localPcap == null) {
+				if (localPcap == null) {
 					/***************************************************************************
 					 * We open up the selected device
 					 **************************************************************************/
@@ -72,36 +77,50 @@ public class Scanner {
 		return pcap;
 	}
 
-	/***************************************************************************
+	/**
+	 * ************************************************************************
 	 * Last thing to do is close the pcap handle
-	 *
+	 * <p>
 	 * This method should be called from UI before exiting application (or when we want to stop capturing packets)
-	 **************************************************************************/
+	 * ************************************************************************
+	 */
 	public static void closePcap() {
 		pcap.close();
 	}
 
 	public static void addHost(TcpSourceDestinationTuple sourceDestinationTuple) {
-		if(Objects.equals(sourceDestinationTuple.getSource(), ipv4Address)) {
+		if (Objects.equals(sourceDestinationTuple.getSource(), ipv4Address)) {
 			addOutgoingHost(sourceDestinationTuple.getDestination());
 		} else {
-			addIncomingHost(sourceDestinationTuple.getSource())
+			addIncomingHost(sourceDestinationTuple.getSource());
 		}
 	}
 
-	private static boolean addIncomingHost(String host) {
-		return incomingHosts.add(host);
+	private static void addIncomingHost(String host) {
+		//if host occured first time - add to map with 1, other case - increase number of occurences
+		incomingHosts.put(host, incomingHosts.getOrDefault(host, 0) + 1);
 	}
 
-	private static boolean addOutgoingHost(String host) {
-		return outgoingHosts.add(host);
+	private static void addOutgoingHost(String host) {
+		//if host occured first time - add to map with 1, other case - increase number of occurences
+		outgoingHosts.put(host, incomingHosts.getOrDefault(host, 0) + 1);
 	}
 
+	// get outgoing sorted by amount of packets
 	public static List<String> getOutgoingHosts() {
-		return outgoingHosts;
+		return outgoingHosts.entrySet().
+				stream().
+				sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).
+				map(Map.Entry::getKey).
+				collect(Collectors.toList());
 	}
 
+	// get incoming sorted by amount of packets
 	public static List<String> getIncomingHosts() {
-		return incomingHosts;
+		return incomingHosts.entrySet().
+				stream().
+				sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).
+				map(Map.Entry::getKey).
+				collect(Collectors.toList());
 	}
 }

@@ -31,10 +31,11 @@ import java.util.List;
 public class MainUI extends Application {
 
 	public static final String CHOOSE_NETWORK_INTERFACE = "Please, choose network interface to get data from: ";
-	public static final String SETTINGS_TAB_NAME = "Settings";
 	public static final String APP_NAME = "Net Scanner";
 	public static final String TCP_TAB_NAME = "TCP package info";
 	public static final String HTTP_TAB_NAME = "HTTP package info";
+	public static final String TCP_HOSTS_TAB_NAME = "TCP hosts info";
+	public static final String SETTINGS_TAB_NAME = "Settings";
 
 	PcapIf selectedDevice = Scanner.findAllDevs().get(0);
 	Text tcpInfoText = getTcpInfoText();
@@ -54,9 +55,10 @@ public class MainUI extends Application {
 
 		Tab tcpTab = createTcpTab();
 		Tab httpTab = createHttpTab();
+		Tab tcpHostsTab = createTcpHostsTab();
 		Tab settingsTab = createSettingsTab();
 
-		tabPane.getTabs().addAll(tcpTab, httpTab, settingsTab);
+		tabPane.getTabs().addAll(tcpTab, httpTab, tcpHostsTab, settingsTab);
 		root.getChildren().add(borderPane);
 
 		primaryStage.setTitle(APP_NAME);
@@ -66,6 +68,40 @@ public class MainUI extends Application {
 		primaryStage.setScene(scene);
 
 		primaryStage.show();
+	}
+
+	private Tab createTcpHostsTab() {
+		Tab tcpHostsTab = new Tab(TCP_HOSTS_TAB_NAME);
+
+		HBox tcpHostsBox = new HBox(50);
+
+
+		VBox incomingBox = new VBox(10);
+		VBox outgoingBox = new VBox(10);
+		tcpHostsBox.getChildren().addAll(incomingBox, outgoingBox);
+
+		incomingBox.getChildren().add(new Text("Incoming hosts: \n\n"));
+		outgoingBox.getChildren().add(new Text("Outgoing hosts: \n\n"));
+
+		Button refreshButton = new Button("Refresh");
+		refreshButton.setOnAction(actionEvent -> {
+			incomingBox.getChildren().clear();
+			outgoingBox.getChildren().clear();
+
+			incomingBox.getChildren().add(new Text("Incoming hosts: \n\n"));
+			outgoingBox.getChildren().add(new Text("Outgoing hosts: \n\n"));
+
+			fillHostsBox(incomingBox, Scanner.getIncomingHosts());
+			fillHostsBox(outgoingBox, Scanner.getOutgoingHosts());
+		});
+		tcpHostsBox.getChildren().add(refreshButton);
+
+		tcpHostsTab.setContent(tcpHostsBox);
+		return tcpHostsTab;
+	}
+
+	private void fillHostsBox(VBox infoBox, List<String> hosts) {
+		hosts.forEach(s -> infoBox.getChildren().add(new Text((s))));
 	}
 
 	private Tab createSettingsTab() throws IOException {
