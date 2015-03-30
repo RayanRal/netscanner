@@ -2,6 +2,7 @@ package com.gmail.netscanner.scanner;
 
 import com.gmail.netscanner.exceptions.DeviceAccessException;
 import com.gmail.netscanner.exceptions.GetDeviceException;
+import com.gmail.netscanner.utils.Utils;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
@@ -18,6 +19,9 @@ public class Scanner {
 	private static int timeout = 10 * 1000;           // 10 seconds in millis
 	private static volatile Pcap pcap;
 	private static StringBuilder errorBuffer = new StringBuilder();
+	private static String ipv4Address;
+	private static final List<String> outgoingHosts = new ArrayList<>();
+	private static final List<String> incomingHosts = new ArrayList<>();
 
 	private Scanner() {}
 
@@ -53,6 +57,8 @@ public class Scanner {
 			throw new DeviceAccessException(errorBuffer.toString());
 		}
 
+		ipv4Address = Utils.getIpv4Address(device);
+
 		return pcap;
 	}
 
@@ -68,5 +74,19 @@ public class Scanner {
 	 **************************************************************************/
 	public static void closePcap() {
 		pcap.close();
+	}
+
+	//to diversify incoming and outgoing messages
+	public static String getIpv4Address() {
+		return ipv4Address;
+	}
+
+
+	public void addIncomingHost(String incomingHost) {
+		incomingHosts.add(incomingHost);
+	}
+
+	public void addOutgoingHost(String outgoingHost) {
+		outgoingHosts.add(outgoingHost);
 	}
 }

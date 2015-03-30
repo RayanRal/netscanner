@@ -87,7 +87,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.gmail.netscanner.scanner.NetScannerOld</mainClass>
+                            <mainClass>com.gmail.netscanner.ui.MainUI</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

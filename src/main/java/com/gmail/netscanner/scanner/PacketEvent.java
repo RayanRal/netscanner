@@ -14,8 +14,10 @@ public abstract class PacketEvent extends Event {
 	protected long frameNumber;
 	protected PcapHeader captureHeader;
 
-	public PacketEvent() {
+	public PacketEvent(long frameNumber, PcapHeader captureHeader) {
 		super(EventType.ROOT);
+		this.frameNumber = frameNumber;
+		this.captureHeader = captureHeader;
 	}
 
 	public long getFrameNumber() {

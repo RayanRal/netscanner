@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.PcapSockAddr;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class MainUI extends Application {
 	PcapIf selectedDevice = Scanner.findAllDevs().get(0);
 	Text tcpInfoText = getTcpInfoText();
 	Text httpInfoText = getHttpInfoText();
+	Button httpStartButton = createStartButton();
+	Button tcpStartButton = createStartButton();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -100,8 +103,10 @@ public class MainUI extends Application {
 	private HBox getDeviceUiInfo(int deviceNumber, ToggleGroup group, PcapIf device) throws IOException {
 		HBox deviceUiInfo = new HBox(10);
 
+		String ipv4address = Utils.getIpv4Address(device);
 		deviceUiInfo.getChildren().add(createRadioButton(deviceNumber, group, device));
-		deviceUiInfo.getChildren().add(new Text(device.getName()));
+		deviceUiInfo.getChildren().add(new Text(device.getDescription()));
+		deviceUiInfo.getChildren().add(new Text(ipv4address));
 
 		//get the mac of device
 		final byte[] mac = device.getHardwareAddress();
@@ -125,7 +130,7 @@ public class MainUI extends Application {
 		HBox mainHorizontalBox = new HBox(30);
 
 		VBox packageInfoBox = getTcpPackageInfoBox();
-		mainHorizontalBox.getChildren().addAll(createStartButton(), packageInfoBox);
+		mainHorizontalBox.getChildren().addAll(tcpStartButton, packageInfoBox);
 
 		tcpTab.setContent(mainHorizontalBox);
 		return tcpTab;
@@ -137,7 +142,7 @@ public class MainUI extends Application {
 		HBox mainHorizontalBox = new HBox(30);
 
 		VBox packageInfoBox = getHttpPackageInfoBox();
-		mainHorizontalBox.getChildren().addAll(createStartButton(), packageInfoBox);
+		mainHorizontalBox.getChildren().addAll(httpStartButton, packageInfoBox);
 
 		httpTab.setContent(mainHorizontalBox);
 		return httpTab;
@@ -164,8 +169,10 @@ public class MainUI extends Application {
 								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
 										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
 										"Checksum: " + packetEvent.getChecksum() + " (" + packetEvent.isChecksumCorrect() + ")\n" +
-										"Source: " + packetEvent.getSourcePort() + "\n" +
-										"Destination: " + packetEvent.getDestinationPort() + "\n" +
+										"Source: " + packetEvent.getSource() + "\n" +
+										"Source port: " + packetEvent.getSourcePort() + "\n" +
+										"Destination: " + packetEvent.getDestination() + "\n" +
+										"Destination port: " + packetEvent.getDestinationPort() + "\n" +
 										"\nHexDump: \n" + packetEvent.getHexDump() + "\n" +
 										"");
 							}
@@ -183,6 +190,11 @@ public class MainUI extends Application {
 								HttpPacketEvent packetEvent = (HttpPacketEvent) event;
 								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
 										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
+										"Content-type: " + packetEvent.getContentType() + "\n" +
+										"Request-type: " + packetEvent.getRequestType() + "\n" +
+										"Message-type: " + packetEvent.getMessageType() + "\n" +
+										"Host: " + packetEvent.getHost() + "\n" +
+										"Connection info: " + packetEvent.getConnectionInfo() + "\n" +
 										"");
 							}
 							event.consume();
@@ -195,7 +207,8 @@ public class MainUI extends Application {
 		Button startButton = new Button("Start catching packets");
 		startButton.setOnAction(event -> {
 			Platform.runLater(new StartButtonAction(selectedDevice, httpInfoText, tcpInfoText));
-			startButton.setVisible(false);
+			httpStartButton.setVisible(false);
+			tcpStartButton.setVisible(false);
 		});
 		return startButton;
 	}

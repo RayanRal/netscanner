@@ -2,6 +2,7 @@ package com.gmail.netscanner.ui;
 
 import com.gmail.netscanner.handlers.AllPacketHandler;
 import com.gmail.netscanner.scanner.Scanner;
+import com.gmail.netscanner.utils.Utils;
 import javafx.event.EventTarget;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;

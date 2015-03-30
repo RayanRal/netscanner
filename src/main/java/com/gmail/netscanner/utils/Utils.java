@@ -1,5 +1,8 @@
 package com.gmail.netscanner.utils;
 
+import org.jnetpcap.PcapIf;
+import org.jnetpcap.PcapSockAddr;
+
 public class Utils {
 
 	public static String asString(final byte[] mac) {
@@ -15,5 +18,14 @@ public class Utils {
 		}
 
 		return buf.toString();
+	}
+
+	public static String getIpv4Address(PcapIf device) {
+		return device.getAddresses().stream()
+				.filter(pcapAddr -> pcapAddr.getAddr().getFamily() == PcapSockAddr.AF_INET) //AF_INET family - ipv4 address, AF_INET6 family - ipv6 address
+				.findFirst()
+				.get() //todo - add error handling
+				.getAddr().toString()
+				.substring(7).replaceAll("]", "");
 	}
 }
