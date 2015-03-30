@@ -1,8 +1,7 @@
 package com.gmail.netscanner.ui;
 
-import com.gmail.netscanner.handlers.AllPacketHandler;
+import com.gmail.netscanner.handlers.PacketHandler;
 import com.gmail.netscanner.scanner.Scanner;
-import com.gmail.netscanner.utils.Utils;
 import javafx.event.EventTarget;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
@@ -18,14 +17,16 @@ public class StartButtonAction implements Runnable {
 
 	private EventTarget httpTarget;
 	private EventTarget tcpTarget;
+	private Integer packetDelay;
 	private Pcap pcap;
 	private final ExecutorService executorService;
 
-	public StartButtonAction(PcapIf device, EventTarget httpTarget, EventTarget tcpTarget) {
+	public StartButtonAction(PcapIf device, EventTarget httpTarget, EventTarget tcpTarget, Integer packetDelay) {
 		this.httpTarget = httpTarget;
 		this.tcpTarget = tcpTarget;
 		pcap = Scanner.initialize(device);
 		executorService = Executors.newSingleThreadExecutor();
+		this.packetDelay = packetDelay;
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class StartButtonAction implements Runnable {
 		 * which protocol ID to use as the data link type for this pcap interface.
 		 **************************************************************************/
 		executorService.execute(() -> {
-					pcap.loop(Pcap.LOOP_INFINITE, new AllPacketHandler(httpTarget, tcpTarget), new Tcp());
+					pcap.loop(Pcap.LOOP_INFINITE, new PacketHandler(httpTarget, tcpTarget, packetDelay), new Tcp());
 				}
 		);
 	}

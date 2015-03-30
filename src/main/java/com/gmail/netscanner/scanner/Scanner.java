@@ -108,19 +108,19 @@ public class Scanner {
 
 	// get outgoing sorted by amount of packets
 	public static List<String> getOutgoingHosts() {
-		return outgoingHosts.entrySet().
-				stream().
-				sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).
-				map(Map.Entry::getKey).
-				collect(Collectors.toList());
+		return sortAndFormatMap(outgoingHosts);
 	}
 
 	// get incoming sorted by amount of packets
 	public static List<String> getIncomingHosts() {
-		return incomingHosts.entrySet().
+		return sortAndFormatMap(incomingHosts);
+	}
+
+	private static List<String> sortAndFormatMap(Map<String, Integer> hosts) {
+		return hosts.entrySet().
 				stream().
 				sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).
-				map(Map.Entry::getKey).
+				map(entry -> entry.getKey() + " - " + entry.getValue() + " packages").
 				collect(Collectors.toList());
 	}
 }

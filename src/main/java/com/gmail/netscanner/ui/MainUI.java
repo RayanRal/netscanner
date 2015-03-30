@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -36,12 +37,14 @@ public class MainUI extends Application {
 	public static final String HTTP_TAB_NAME = "HTTP package info";
 	public static final String TCP_HOSTS_TAB_NAME = "TCP hosts info";
 	public static final String SETTINGS_TAB_NAME = "Settings";
+	public static final String PACKET_CAPTURING_DELAY = "\n\nInput packet capturing delay in ms: ";
 
 	PcapIf selectedDevice = Scanner.findAllDevs().get(0);
 	Text tcpInfoText = getTcpInfoText();
 	Text httpInfoText = getHttpInfoText();
 	Button httpStartButton = createStartButton();
 	Button tcpStartButton = createStartButton();
+	TextField packetCapturingDelay = new TextField();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -75,7 +78,6 @@ public class MainUI extends Application {
 
 		HBox tcpHostsBox = new HBox(50);
 
-
 		VBox incomingBox = new VBox(10);
 		VBox outgoingBox = new VBox(10);
 		tcpHostsBox.getChildren().addAll(incomingBox, outgoingBox);
@@ -101,7 +103,11 @@ public class MainUI extends Application {
 	}
 
 	private void fillHostsBox(VBox infoBox, List<String> hosts) {
-		hosts.forEach(s -> infoBox.getChildren().add(new Text((s))));
+		int i = 1;
+		for(String host : hosts) {
+			infoBox.getChildren().add(new Text(i + ": " + host));
+			i++;
+		}
 	}
 
 	private Tab createSettingsTab() throws IOException {
@@ -115,6 +121,9 @@ public class MainUI extends Application {
 
 		mainBox.getChildren().add(choose);
 		mainBox.getChildren().addAll(devicesList);
+
+		packetCapturingDelay.setPromptText("500");
+		mainBox.getChildren().addAll(new Text(PACKET_CAPTURING_DELAY), packetCapturingDelay);
 
 		settingsTab.setContent(mainBox);
 		return settingsTab;
@@ -239,7 +248,8 @@ public class MainUI extends Application {
 	private Button createStartButton() {
 		Button startButton = new Button("Start catching packets");
 		startButton.setOnAction(event -> {
-			Platform.runLater(new StartButtonAction(selectedDevice, httpInfoText, tcpInfoText));
+			Integer packetDelay = packetCapturingDelay.getText().isEmpty() ? 500 : Integer.valueOf(packetCapturingDelay.getText());
+			Platform.runLater(new StartButtonAction(selectedDevice, httpInfoText, tcpInfoText, packetDelay));
 			httpStartButton.setVisible(false);
 			tcpStartButton.setVisible(false);
 		});

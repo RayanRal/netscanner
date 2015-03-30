@@ -5,7 +5,6 @@ import org.jnetpcap.PcapHeader;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**

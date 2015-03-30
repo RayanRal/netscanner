@@ -9,8 +9,9 @@ import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 
-public class AllPacketHandler implements PcapPacketHandler {
+public class PacketHandler implements PcapPacketHandler {
 
+	private final Integer packetDelay;
 	private final Tcp tcp = new Tcp();
 	private final Http http = new Http();
 
@@ -20,9 +21,10 @@ public class AllPacketHandler implements PcapPacketHandler {
 	/*
 	 * Same thing for our http header
 	 */
-	public AllPacketHandler(EventTarget httpTarget, EventTarget tcpTarget) {
+	public PacketHandler(EventTarget httpTarget, EventTarget tcpTarget, Integer packetDelay) {
 		this.httpTarget = httpTarget;
 		this.tcpTarget = tcpTarget;
+		this.packetDelay = packetDelay;
 	}
 
 
@@ -31,7 +33,7 @@ public class AllPacketHandler implements PcapPacketHandler {
 	 * dispatch to us.
 	 *
 	 * @param packet a packet we captured
-	 * @param tcp our custom user parameter which we chose to be a StringBuilder
+	 * @param o our custom user parameter which we chose to be a StringBuilder
 	 *               object, but could have chosen anything else we wanted passed
 	 *               into our handler by libpcap
 	 */
@@ -55,7 +57,7 @@ public class AllPacketHandler implements PcapPacketHandler {
 					packet.getCaptureHeader(), packet.toHexdump()));
 			System.out.println("fired tcp event!");
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(packetDelay);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -65,7 +67,7 @@ public class AllPacketHandler implements PcapPacketHandler {
 			Event.fireEvent(httpTarget, new HttpPacketEvent(packet.getFrameNumber(), packet.getHeader(http), packet.getCaptureHeader()));
 			System.out.println("fired http event!");
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(packetDelay);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
