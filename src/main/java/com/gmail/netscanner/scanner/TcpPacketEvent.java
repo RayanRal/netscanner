@@ -1,10 +1,11 @@
 package com.gmail.netscanner.scanner;
 
+import com.gmail.netscanner.utils.TcpSourceDestinationTuple;
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
 
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -14,11 +15,14 @@ public class TcpPacketEvent extends PacketEvent {
 
 	private Tcp tcp;
 	private String hexDump;
+	private TcpSourceDestinationTuple sourceDestinationTuple;
 
 	public TcpPacketEvent(long frameNumber, Tcp tcp, PcapHeader captureHeader, String hexDump) {
 		super(frameNumber, captureHeader);
 		this.tcp = tcp;
 		this.hexDump = hexDump;
+		sourceDestinationTuple = new TcpSourceDestinationTuple(getValueFromHeader("source"), getValueFromHeader("destination"));
+		Scanner.addHost(sourceDestinationTuple);
 	}
 
 	public String getChecksum() {
@@ -46,11 +50,11 @@ public class TcpPacketEvent extends PacketEvent {
 	}
 
 	public String getDestination() {
-		return getValueFromHeader("destination");
+		return sourceDestinationTuple.getDestination();
 	}
 
-	public String getSource() {
-		return getValueFromHeader("source");
+	public String getTcpSource() {
+		return sourceDestinationTuple.getSource();
 	}
 
 	private String getValueFromHeader(String key) {

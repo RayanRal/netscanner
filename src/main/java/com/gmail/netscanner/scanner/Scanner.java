@@ -2,12 +2,14 @@ package com.gmail.netscanner.scanner;
 
 import com.gmail.netscanner.exceptions.DeviceAccessException;
 import com.gmail.netscanner.exceptions.GetDeviceException;
+import com.gmail.netscanner.utils.TcpSourceDestinationTuple;
 import com.gmail.netscanner.utils.Utils;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by le012ch on 2015-03-20.
@@ -19,7 +21,10 @@ public class Scanner {
 	private static int timeout = 10 * 1000;           // 10 seconds in millis
 	private static volatile Pcap pcap;
 	private static StringBuilder errorBuffer = new StringBuilder();
+
+	//to diversify incoming and outgoing messages
 	private static String ipv4Address;
+
 	private static final List<String> outgoingHosts = new ArrayList<>();
 	private static final List<String> incomingHosts = new ArrayList<>();
 
@@ -76,17 +81,27 @@ public class Scanner {
 		pcap.close();
 	}
 
-	//to diversify incoming and outgoing messages
-	public static String getIpv4Address() {
-		return ipv4Address;
+	public static void addHost(TcpSourceDestinationTuple sourceDestinationTuple) {
+		if(Objects.equals(sourceDestinationTuple.getSource(), ipv4Address)) {
+			addOutgoingHost(sourceDestinationTuple.getDestination());
+		} else {
+			addIncomingHost(sourceDestinationTuple.getSource())
+		}
 	}
 
-
-	public void addIncomingHost(String incomingHost) {
-		incomingHosts.add(incomingHost);
+	private static boolean addIncomingHost(String host) {
+		return incomingHosts.add(host);
 	}
 
-	public void addOutgoingHost(String outgoingHost) {
-		outgoingHosts.add(outgoingHost);
+	private static boolean addOutgoingHost(String host) {
+		return outgoingHosts.add(host);
+	}
+
+	public static List<String> getOutgoingHosts() {
+		return outgoingHosts;
+	}
+
+	public static List<String> getIncomingHosts() {
+		return incomingHosts;
 	}
 }

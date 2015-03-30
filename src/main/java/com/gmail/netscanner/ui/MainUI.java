@@ -20,7 +20,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.jnetpcap.PcapIf;
-import org.jnetpcap.PcapSockAddr;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -169,10 +168,8 @@ public class MainUI extends Application {
 								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
 										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
 										"Checksum: " + packetEvent.getChecksum() + " (" + packetEvent.isChecksumCorrect() + ")\n" +
-										"Source: " + packetEvent.getSource() + "\n" +
-										"Source port: " + packetEvent.getSourcePort() + "\n" +
-										"Destination: " + packetEvent.getDestination() + "\n" +
-										"Destination port: " + packetEvent.getDestinationPort() + "\n" +
+										"Source: " + packetEvent.getTcpSource() + ":" + packetEvent.getSourcePort() + " \n" +
+										"Destination: " + packetEvent.getDestination() + ":" + packetEvent.getDestinationPort() + "\n" +
 										"\nHexDump: \n" + packetEvent.getHexDump() + "\n" +
 										"");
 							}
