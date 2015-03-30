@@ -1,21 +1,30 @@
 package com.gmail.netscanner.handlers;
 
-import com.gmail.netscanner.scanner.NextPacketEvent;
+import com.gmail.netscanner.scanner.HttpPacketEvent;
+import com.gmail.netscanner.scanner.TcpPacketEvent;
 import javafx.event.Event;
 import javafx.event.EventTarget;
 import org.jnetpcap.packet.PcapPacket;
+import org.jnetpcap.packet.PcapPacketHandler;
+import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 
-public class TcpPacketHandler extends PacketHandler<Tcp> {
+public class AllPacketHandler implements PcapPacketHandler {
 
-//	final Tcp tcp = new Tcp();
+	private final Tcp tcp = new Tcp();
+	private final Http http = new Http();
+
+	final EventTarget httpTarget;
+	final EventTarget tcpTarget;
 
 	/*
 	 * Same thing for our http header
 	 */
-	public TcpPacketHandler(EventTarget target) {
-		super(target);
+	public AllPacketHandler(EventTarget httpTarget, EventTarget tcpTarget) {
+		this.httpTarget = httpTarget;
+		this.tcpTarget = tcpTarget;
 	}
+
 
 	/**
 	 * Our custom handler that will receive all the packets libpcap will
@@ -26,9 +35,9 @@ public class TcpPacketHandler extends PacketHandler<Tcp> {
 	 *               object, but could have chosen anything else we wanted passed
 	 *               into our handler by libpcap
 	 */
-	public void nextPacket(PcapPacket packet, Tcp tcp) {
-
-                /*
+	@Override
+	public void nextPacket(PcapPacket packet, Object o) {
+		/*
                  * Here we receive 1 packet at a time from the capture file. We are
                  * going to check if we have a tcp packet and do something with tcp
                  * header. We are actually going to do this twice to show 2 different
@@ -42,18 +51,25 @@ public class TcpPacketHandler extends PacketHandler<Tcp> {
             * Now get our tcp header definition (accessor) peered with actual
             * memory that holds the tcp header within the packet.
             */
-			Event.fireEvent(target, new NextPacketEvent(packet.getFrameNumber(), packet.getHeader(tcp),
+			Event.fireEvent(tcpTarget, new TcpPacketEvent(packet.getFrameNumber(), packet.getHeader(tcp),
 					packet.getCaptureHeader(), packet.toHexdump()));
-			System.out.println("fired event!");
+			System.out.println("fired tcp event!");
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
-		} else {
-			System.out.println("Something wrong, not firing event!");
 		}
-	}
 
+		if (packet.hasHeader(http)  && packet.hasHeader(Http.ID)) {
+			Event.fireEvent(httpTarget, new HttpPacketEvent(packet.getFrameNumber(), packet.getHeader(http), packet.getCaptureHeader()));
+			System.out.println("fired http event!");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 }

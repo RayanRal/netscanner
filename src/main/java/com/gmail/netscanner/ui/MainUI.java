@@ -1,7 +1,8 @@
 package com.gmail.netscanner.ui;
 
+import com.gmail.netscanner.scanner.HttpPacketEvent;
 import com.gmail.netscanner.scanner.Scanner;
-import com.gmail.netscanner.scanner.NextPacketEvent;
+import com.gmail.netscanner.scanner.TcpPacketEvent;
 import com.gmail.netscanner.utils.Utils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -32,11 +33,12 @@ public class MainUI extends Application {
 	public static final String CHOOSE_NETWORK_INTERFACE = "Please, choose network interface to get data from: ";
 	public static final String SETTINGS_TAB_NAME = "Settings";
 	public static final String APP_NAME = "Net Scanner";
-	public static final String MAIN_TAB_NAME = "Main";
+	public static final String TCP_TAB_NAME = "TCP package info";
+	public static final String HTTP_TAB_NAME = "HTTP package info";
 
 	PcapIf selectedDevice = Scanner.findAllDevs().get(0);
-	Button startButton = createStartButton();
-	Text text = getInfoText();
+	Text tcpInfoText = getTcpInfoText();
+	Text httpInfoText = getHttpInfoText();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -48,10 +50,11 @@ public class MainUI extends Application {
 		borderPane.prefHeightProperty().bind(scene.heightProperty());
 		borderPane.prefWidthProperty().bind(scene.widthProperty());
 
-		Tab mainTab = createMainTab();
+		Tab tcpTab = createTcpTab();
+		Tab httpTab = createHttpTab();
 		Tab settingsTab = createSettingsTab();
 
-		tabPane.getTabs().addAll(mainTab, settingsTab);
+		tabPane.getTabs().addAll(tcpTab, httpTab, settingsTab);
 		root.getChildren().add(borderPane);
 
 		primaryStage.setTitle(APP_NAME);
@@ -116,30 +119,48 @@ public class MainUI extends Application {
 		return radioButton;
 	}
 
-	private Tab createMainTab() {
-		Tab mainTab = new Tab(MAIN_TAB_NAME);
+	private Tab createTcpTab() {
+		Tab tcpTab = new Tab(TCP_TAB_NAME);
 
 		HBox mainHorizontalBox = new HBox(30);
 
-		VBox packageInfoBox = getPackageInfoBox();
-		mainHorizontalBox.getChildren().addAll(startButton, packageInfoBox);
+		VBox packageInfoBox = getTcpPackageInfoBox();
+		mainHorizontalBox.getChildren().addAll(createStartButton(), packageInfoBox);
 
-		mainTab.setContent(mainHorizontalBox);
-		return mainTab;
+		tcpTab.setContent(mainHorizontalBox);
+		return tcpTab;
 	}
 
-	private VBox getPackageInfoBox() {
+	private Tab createHttpTab() {
+		Tab httpTab = new Tab(HTTP_TAB_NAME);
+
+		HBox mainHorizontalBox = new HBox(30);
+
+		VBox packageInfoBox = getHttpPackageInfoBox();
+		mainHorizontalBox.getChildren().addAll(createStartButton(), packageInfoBox);
+
+		httpTab.setContent(mainHorizontalBox);
+		return httpTab;
+	}
+
+	private VBox getHttpPackageInfoBox() {
 		VBox box = new VBox(5);
-		box.getChildren().add(text);
+		box.getChildren().add(httpInfoText);
 		return box;
 	}
 
-	private Text getInfoText() {
-		Text text = new Text("Here will be text!");
-		text.addEventHandler(EventType.ROOT, event ->	Platform.runLater(
+	private VBox getTcpPackageInfoBox() {
+		VBox box = new VBox(5);
+		box.getChildren().add(tcpInfoText);
+		return box;
+	}
+
+	private Text getTcpInfoText() {
+		Text text = new Text("Here will be tcpInfoText!");
+		text.addEventHandler(EventType.ROOT, event -> Platform.runLater(
 						() -> {
-							if (event instanceof NextPacketEvent) {
-								NextPacketEvent packetEvent = (NextPacketEvent) event;
+							if (event instanceof TcpPacketEvent) {
+								TcpPacketEvent packetEvent = (TcpPacketEvent) event;
 								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
 										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
 										"Checksum: " + packetEvent.getChecksum() + " (" + packetEvent.isChecksumCorrect() + ")\n" +
@@ -154,10 +175,26 @@ public class MainUI extends Application {
 		return text;
 	}
 
+	private Text getHttpInfoText() {
+		Text text = new Text("Here will be httpInfoText!");
+		text.addEventHandler(EventType.ROOT, event ->	Platform.runLater(
+						() -> {
+							if (event instanceof HttpPacketEvent) {
+								HttpPacketEvent packetEvent = (HttpPacketEvent) event;
+								text.setText("Frame number: " + packetEvent.getFrameNumber() + "\n" +
+										"Timestamp: " + packetEvent.getTimestamp() + "\n" +
+										"");
+							}
+							event.consume();
+						})
+		);
+		return text;
+	}
+
 	private Button createStartButton() {
 		Button startButton = new Button("Start catching packets");
 		startButton.setOnAction(event -> {
-			Platform.runLater(new StartButtonAction(selectedDevice, text));
+			Platform.runLater(new StartButtonAction(selectedDevice, httpInfoText, tcpInfoText));
 			startButton.setVisible(false);
 		});
 		return startButton;
